@@ -78,8 +78,8 @@ const inError = (illuminationSources) => (tile) => ({
   inError: (tile.isWall && (illuminationSources.numberAdjacent > tile.numberAdjacent)) ||
     (tile.hasPawpurrazzi && pipe(values, some(identity))(illuminationSources.inDirection)) || 
     (tile.isIlluminated && (
-      illuminationSources.north && illuminationSources.south ||
-      illuminationSources.east && illuminationSources.west))
+      illuminationSources.inDirection.north && illuminationSources.inDirection.south ||
+      illuminationSources.inDirection.east && illuminationSources.inDirection.west))
 });
 
 const tilesWithIlluminationSources = (...mappers) => (gala) => 

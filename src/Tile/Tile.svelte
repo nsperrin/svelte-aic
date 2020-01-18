@@ -39,7 +39,7 @@
         background-color: yellowgreen;
 
         &[inError=true]{
-          background-color: darkred;
+          background-color: red;
         }
       }
 
