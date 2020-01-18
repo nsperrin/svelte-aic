@@ -49,26 +49,37 @@ const tilesSouth = tilesUntilWall(([ri, ci]) => [ri + 1, ci]);
 const tilesEast = tilesUntilWall(([ri, ci]) => [ri, ci + 1]);
 const tilesWest = tilesUntilWall(([ri, ci]) => [ri, ci - 1]);
 
-const illuminationSources = tile => gala => ({
-  north: some(x => x.hasPawpurrazzi)(tilesNorth(tile)(gala)),
-  south: some(x => x.hasPawpurrazzi)(tilesSouth(tile)(gala)),
-  east: some(x => x.hasPawpurrazzi)(tilesEast(tile)(gala)),
-  west: some(x => x.hasPawpurrazzi)(tilesWest(tile)(gala)),
-})
+const illuminationSources = tile => gala => {
+  const tilesN = tilesNorth(tile)(gala);
+  const tilesS = tilesSouth(tile)(gala);
+  const tilesE = tilesEast(tile)(gala);
+  const tilesW = tilesWest(tile)(gala);
+  const numberAdjacent = [tilesN[0], tilesS[0], tilesE[0], tilesW[0]]
+    .filter(identity)
+    .reduce((sum, tile) => tile.hasPawpurrazzi ? sum + 1: sum, 0);
+  return {
+    inDirection: {
+      north: some(x => x.hasPawpurrazzi)(tilesN),
+      south: some(x => x.hasPawpurrazzi)(tilesS),
+      east: some(x => x.hasPawpurrazzi)(tilesE),
+      west: some(x => x.hasPawpurrazzi)(tilesW),
+    },
+    numberAdjacent
+  }
+}
 
 const lit = (illuminationSources) => (tile) => ({
   ...tile, 
-  isIlluminated: !tile.isWall && pipe(values, some(identity))(illuminationSources)
+  isIlluminated: !tile.isWall && pipe(values, some(identity))(illuminationSources.inDirection)
 });
 
 const inError = (illuminationSources) => (tile) => ({
   ...tile,
-  inError: !tile.isWall && (
-    (tile.hasPawpurrazzi && pipe(values, some(identity))(illuminationSources)) || 
+  inError: (tile.isWall && (illuminationSources.numberAdjacent > tile.numberAdjacent)) ||
+    (tile.hasPawpurrazzi && pipe(values, some(identity))(illuminationSources.inDirection)) || 
     (tile.isIlluminated && (
       illuminationSources.north && illuminationSources.south ||
       illuminationSources.east && illuminationSources.west))
-  )
 });
 
 const tilesWithIlluminationSources = (...mappers) => (gala) => 
