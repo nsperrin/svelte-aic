@@ -1,15 +1,6 @@
 import { writable } from 'svelte/store';
-import {initialGalaState} from '../App.helpers';
 
-export const galaStore = writable(initialGalaState([
-  "TE21XHI",
-  "SIAS1FM",
-  "P ILLL ",
-  "2EE3AR0",
-  "1TENX1T",
-  "SF ORWG",
-  "RIE1 DR",
-]));
+export const galaStore = writable([]);
 
 const pipe = (...fns) => (input) =>  fns.reduce((lastValue, fn) => fn(lastValue), input);
 
@@ -20,6 +11,30 @@ const identity = x => x;
 const some = (evaluate) => (items) => items.reduce((acc, item) => acc || evaluate(item), false); 
 
 const cloneGala = (gala) => [...gala.map(r => [...r])];
+
+const initialSpace = (value) => (rowIndex, colIndex) => {
+  const isWall = /^\d+|\s$/.test(value);
+  const numberAdjacent = isWall && /^\d+$/.test(value) 
+    ? parseInt(value, 10) 
+    : undefined
+  return {
+    value,
+    isWall,
+    numberAdjacent,
+    hasPawpurrazzi: false,
+    isIlluminated: false,
+    inError: false,
+    rowIndex,
+    colIndex,
+  }
+};
+
+export const initialGalaState = (rowStrings) => 
+  rowStrings.map((rs, ri) => 
+    [...rs].map((v, ci) => 
+      initialSpace(v)(ri, ci)
+    )
+  );
 
 const togglePawpurrazzi = (rowIndex, colIndex) => (gala) => {
   const galaCopy = cloneGala(gala);
@@ -70,7 +85,9 @@ const illuminationSources = tile => gala => {
 
 const lit = (illuminationSources) => (tile) => ({
   ...tile, 
-  isIlluminated: !tile.isWall && pipe(values, some(identity))(illuminationSources.inDirection)
+  isIlluminated: (!tile.isWall && pipe(values, some(identity))(illuminationSources.inDirection)) || (
+    tile.isWall && (tile.numberAdjacent === illuminationSources.numberAdjacent)
+  )
 });
 
 const inError = (illuminationSources) => (tile) => ({
@@ -89,6 +106,10 @@ const tilesWithIlluminationSources = (...mappers) => (gala) =>
       return pipe(...mappers.map(mapper => mapper(is)))(tile); 
     })
   );
+
+export const setGalaState = (rowStrings) => () => {
+  galaStore.update(() => initialGalaState(rowStrings))
+}
 
 export const handleTileSelection = (tile) => () => {
   tile.isWall || galaStore.update(pipe(

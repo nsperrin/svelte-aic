@@ -1,5 +1,5 @@
 <script>
-  import {handleTileSelection} from "../stores/galaStore.js";
+  import {handleTileSelection} from "../stores/gala/galaStore.js";
   export let galaTile;
 </script>
 
@@ -17,6 +17,16 @@
     width: 1.5em;
     justify-content: center;
 
+    .value-wrapper {
+      padding: 1em;
+      border-radius: 4px;
+      min-height: 1em;
+      min-width: 1em;
+      margin: -1em;
+      font-weight: 800;
+      border: 2px solid transparent;
+    }
+
     &[wall=true]{
       background-color: gray;
       color: white;
@@ -24,33 +34,31 @@
       .value-wrapper[inError=true]{
         color: darkred;
       }
+
+      .value-wrapper[lit=true]{
+        color: yellowgreen;
+      }
     }
 
-    .value-wrapper {
-      padding: 1em;
-      border-radius: 4px;
-      min-height: 1em;
-      min-width: 1em;
-      margin: -1em;
-      font-weight: bold;
-      border: 2px solid transparent;
+    &[wall=false] {
+      .value-wrapper {
+        &[lit=true] {
+          background-color: yellowgreen;
 
-      &[lit=true]{
-        background-color: yellowgreen;
-
-        &[inError=true]{
-          background-color: red;
+          &[inError=true]{
+            background-color: red;
+          }
         }
-      }
 
-      &[pawpurrazzi=true]{
-        border: 2px solid darkgreen;
-        background-color: yellowgreen;
-        border-radius: 50%;
+        &[pawpurrazzi=true]{
+          border: 2px solid darkgreen;
+          background-color: yellowgreen;
+          border-radius: 50%;
 
-        &[inError=true]{
-          border: 2px solid darkred;
-          background-color: red;
+          &[inError=true]{
+            border: 2px solid darkred;
+            background-color: red;
+          }
         }
       }
     }
