@@ -91,13 +91,28 @@ const lit = (illuminationSources) => (tile) => ({
   )
 });
 
+const wallError = ({numberAdjacent}) => ({isWall, numberAdjacent: maxAdjacent}) => {
+  return isWall && maxAdjacent !== undefined && numberAdjacent > maxAdjacent;
+}
+
+const tileIlluminationError = ({inDirection: dir}) => ({isWall, isIlluminated}) => {
+  const multipleVertically = dir.north && dir.south;
+  const multipleHorizontally = dir.east && dir.west;
+  return !isWall && isIlluminated && (multipleVertically || multipleHorizontally);
+}
+
+const pawpurrazziError = ({inDirection: dir}) => ({hasPawpurrazzi}) => {
+  const anotherIsInView = pipe(values, some(identity))(dir);
+  return hasPawpurrazzi && anotherIsInView;
+}
+
 const inError = (illuminationSources) => (tile) => ({
   ...tile,
-  inError: (tile.isWall && (illuminationSources.numberAdjacent > tile.numberAdjacent)) ||
-    (tile.hasPawpurrazzi && pipe(values, some(identity))(illuminationSources.inDirection)) || 
-    (tile.isIlluminated && (
-      illuminationSources.inDirection.north && illuminationSources.inDirection.south ||
-      illuminationSources.inDirection.east && illuminationSources.inDirection.west))
+  inError: (
+    wallError(illuminationSources)(tile) ||
+    tileIlluminationError(illuminationSources)(tile) ||
+    pawpurrazziError(illuminationSources)(tile)
+  )
 });
 
 const tilesWithIlluminationSources = (...mappers) => (gala) => 
