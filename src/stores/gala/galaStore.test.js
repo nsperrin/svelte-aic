@@ -1,11 +1,14 @@
 import { galaStore, setGalaState } from "./galaStore";
 import * as faker from "faker";
 
+const storeValueAfter = (store) => async (action, ...params) => new Promise(r => {
+  action(...params);
+  store.subscribe(r);
+});
+
 const testStateInitialization = (name, value, expected) => {
-  it(name, () => {
-    let gala;
-    galaStore.subscribe(gs => gala = gs);
-    setGalaState([value])();
+  it(name, async () => {
+    const gala = await storeValueAfter(galaStore)(setGalaState([value]))
     expect(gala[0][0]).toEqual(expected);
   });
 };
@@ -47,16 +50,16 @@ describe("galaStore", () => {
       });
     });
 
-    it('spreads strings into 2D array', () => {
+    it('spreads strings into 2D array', async () => {
       const input = [
         `${alpha()}${alpha()}${alpha()}`,
         `${alpha()}${alpha()}${alpha()}`,
         `${alpha()}${alpha()}${alpha()}`,
       ];
-      let output;
-      galaStore.subscribe(gs => output = gs.map(r => r.map(t => t.value).join('')));
-      setGalaState(input)();
+      const output = (await storeValueAfter(galaStore)(setGalaState(input)))
+        .map(r => r.map(t => t.value).join(""));
       expect(output).toEqual(input);
     });
   });
+
 });
