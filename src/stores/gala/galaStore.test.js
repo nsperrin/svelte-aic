@@ -122,118 +122,40 @@ describe("galaStore", () => {
           expect(galaAfterSelection[6][3].isIlluminated).toEqual(false);
         });
 
-        it("it illuminates numbered wall if the number of adjacent pawpurrazzi equals the numberOnWall", async () => {
-          const init0 = await storeValueAfter(galaStore)(setGalaState([" A ", "A0A", " A "]));
-          expect(init0[1][1].isIlluminated).toEqual(true);
-          const after0_1 = await storeValueAfter(galaStore)(handleTileSelection(init0[0][1]));
-          const after0_2 = await storeValueAfter(galaStore)(handleTileSelection(after0_1[1][0]));
-          const after0_3 = await storeValueAfter(galaStore)(handleTileSelection(after0_2[1][2]));
-          const after0_4 = await storeValueAfter(galaStore)(handleTileSelection(after0_3[2][1]));
-          expect(after0_1[1][1].isIlluminated).toEqual(false);
-          expect(after0_2[1][1].isIlluminated).toEqual(false);
-          expect(after0_3[1][1].isIlluminated).toEqual(false);
-          expect(after0_4[1][1].isIlluminated).toEqual(false);
-          
-          const init1 = await storeValueAfter(galaStore)(setGalaState([" A ", "A1A", " A "]));
-          expect(init1[1][1].isIlluminated).toEqual(false);
-          const after1_1 = await storeValueAfter(galaStore)(handleTileSelection(init1[0][1]));
-          const after1_2 = await storeValueAfter(galaStore)(handleTileSelection(after1_1[1][0]));
-          const after1_3 = await storeValueAfter(galaStore)(handleTileSelection(after1_2[1][2]));
-          const after1_4 = await storeValueAfter(galaStore)(handleTileSelection(after1_3[2][1]));
-          expect(after1_1[1][1].isIlluminated).toEqual(true);
-          expect(after1_2[1][1].isIlluminated).toEqual(false);
-          expect(after1_3[1][1].isIlluminated).toEqual(false);
-          expect(after1_4[1][1].isIlluminated).toEqual(false);
+        describe('wall states', () => {
+          const testWallState = (getter, name) => (value) => (expecteds) => {
+            it(`${name} is set for ${value}`, async () => {
+              const stateChange = storeValueAfter(galaStore);
+              const initN = await stateChange(setGalaState([" A ", `A${value}A`, " A "]));
+              expect(getter(initN[1][1])).toEqual(expecteds[0]);
+              const afterN_1 = await stateChange(handleTileSelection(initN[0][1]));
+              const afterN_2 = await stateChange(handleTileSelection(afterN_1[1][0]));
+              const afterN_3 = await stateChange(handleTileSelection(afterN_2[1][2]));
+              const afterN_4 = await stateChange(handleTileSelection(afterN_3[2][1]));
+              expect(getter(afterN_1[1][1])).toEqual(expecteds[1]);
+              expect(getter(afterN_2[1][1])).toEqual(expecteds[2]);
+              expect(getter(afterN_3[1][1])).toEqual(expecteds[3]);
+              expect(getter(afterN_4[1][1])).toEqual(expecteds[4]);
+            });
+          }     
 
-          const init2 = await storeValueAfter(galaStore)(setGalaState([" A ", "A2A", " A "]));
-          expect(init2[1][1].isIlluminated).toEqual(false);
-          const after2_1 = await storeValueAfter(galaStore)(handleTileSelection(init2[0][1]));
-          const after2_2 = await storeValueAfter(galaStore)(handleTileSelection(after2_1[1][0]));
-          const after2_3 = await storeValueAfter(galaStore)(handleTileSelection(after2_2[1][2]));
-          const after2_4 = await storeValueAfter(galaStore)(handleTileSelection(after2_3[2][1]));
-          expect(after2_1[1][1].isIlluminated).toEqual(false);
-          expect(after2_2[1][1].isIlluminated).toEqual(true);
-          expect(after2_3[1][1].isIlluminated).toEqual(false);
-          expect(after2_4[1][1].isIlluminated).toEqual(false);
+          describe("illumination", () => {
+            const testWallIllumination = testWallState(x => x.isIlluminated, "illumination");
+            testWallIllumination("0")([true, false, false, false, false]);
+            testWallIllumination("1")([false, true, false, false, false]);
+            testWallIllumination("2")([false, false, true, false, false]);
+            testWallIllumination("3")([false, false, false, true, false]);
+            testWallIllumination("4")([false, false, false, false, true]);
+          });
 
-          const init3 = await storeValueAfter(galaStore)(setGalaState([" A ", "A3A", " A "]));
-          expect(init3[1][1].isIlluminated).toEqual(false);
-          const after3_1 = await storeValueAfter(galaStore)(handleTileSelection(init3[0][1]));
-          const after3_2 = await storeValueAfter(galaStore)(handleTileSelection(after3_1[1][0]));
-          const after3_3 = await storeValueAfter(galaStore)(handleTileSelection(after3_2[1][2]));
-          const after3_4 = await storeValueAfter(galaStore)(handleTileSelection(after3_3[2][1]));
-          expect(after3_1[1][1].isIlluminated).toEqual(false);
-          expect(after3_2[1][1].isIlluminated).toEqual(false);
-          expect(after3_3[1][1].isIlluminated).toEqual(true);
-          expect(after3_4[1][1].isIlluminated).toEqual(false);
-
-          const init4 = await storeValueAfter(galaStore)(setGalaState([" A ", "A4A", " A "]));
-          expect(init4[1][1].isIlluminated).toEqual(false);
-          const after4_1 = await storeValueAfter(galaStore)(handleTileSelection(init4[0][1]));
-          const after4_2 = await storeValueAfter(galaStore)(handleTileSelection(after4_1[1][0]));
-          const after4_3 = await storeValueAfter(galaStore)(handleTileSelection(after4_2[1][2]));
-          const after4_4 = await storeValueAfter(galaStore)(handleTileSelection(after4_3[2][1]));
-          expect(after4_1[1][1].isIlluminated).toEqual(false);
-          expect(after4_2[1][1].isIlluminated).toEqual(false);
-          expect(after4_3[1][1].isIlluminated).toEqual(false);
-          expect(after4_4[1][1].isIlluminated).toEqual(true);
-        });
-
-        it("it sets error on numbered wall if the number of adjacent pawpurrazzi exceeds the numberOnWall", async () => {
-          const init0 = await storeValueAfter(galaStore)(setGalaState([" A ", "A0A", " A "]));
-          expect(init0[1][1].inError).toEqual(false);
-          const after0_1 = await storeValueAfter(galaStore)(handleTileSelection(init0[0][1]));
-          const after0_2 = await storeValueAfter(galaStore)(handleTileSelection(after0_1[1][0]));
-          const after0_3 = await storeValueAfter(galaStore)(handleTileSelection(after0_2[1][2]));
-          const after0_4 = await storeValueAfter(galaStore)(handleTileSelection(after0_3[2][1]));
-          expect(after0_1[1][1].inError).toEqual(true);
-          expect(after0_2[1][1].inError).toEqual(true);
-          expect(after0_3[1][1].inError).toEqual(true);
-          expect(after0_4[1][1].inError).toEqual(true);
-          
-          const init1 = await storeValueAfter(galaStore)(setGalaState([" A ", "A1A", " A "]));
-          expect(init1[1][1].inError).toEqual(false);
-          const after1_1 = await storeValueAfter(galaStore)(handleTileSelection(init1[0][1]));
-          const after1_2 = await storeValueAfter(galaStore)(handleTileSelection(after1_1[1][0]));
-          const after1_3 = await storeValueAfter(galaStore)(handleTileSelection(after1_2[1][2]));
-          const after1_4 = await storeValueAfter(galaStore)(handleTileSelection(after1_3[2][1]));
-          expect(after1_1[1][1].inError).toEqual(false);
-          expect(after1_2[1][1].inError).toEqual(true);
-          expect(after1_3[1][1].inError).toEqual(true);
-          expect(after1_4[1][1].inError).toEqual(true);
-
-          const init2 = await storeValueAfter(galaStore)(setGalaState([" A ", "A2A", " A "]));
-          expect(init2[1][1].inError).toEqual(false);
-          const after2_1 = await storeValueAfter(galaStore)(handleTileSelection(init2[0][1]));
-          const after2_2 = await storeValueAfter(galaStore)(handleTileSelection(after2_1[1][0]));
-          const after2_3 = await storeValueAfter(galaStore)(handleTileSelection(after2_2[1][2]));
-          const after2_4 = await storeValueAfter(galaStore)(handleTileSelection(after2_3[2][1]));
-          expect(after2_1[1][1].inError).toEqual(false);
-          expect(after2_2[1][1].inError).toEqual(false);
-          expect(after2_3[1][1].inError).toEqual(true);
-          expect(after2_4[1][1].inError).toEqual(true);
-
-          const init3 = await storeValueAfter(galaStore)(setGalaState([" A ", "A3A", " A "]));
-          expect(init3[1][1].inError).toEqual(false);
-          const after3_1 = await storeValueAfter(galaStore)(handleTileSelection(init3[0][1]));
-          const after3_2 = await storeValueAfter(galaStore)(handleTileSelection(after3_1[1][0]));
-          const after3_3 = await storeValueAfter(galaStore)(handleTileSelection(after3_2[1][2]));
-          const after3_4 = await storeValueAfter(galaStore)(handleTileSelection(after3_3[2][1]));
-          expect(after3_1[1][1].inError).toEqual(false);
-          expect(after3_2[1][1].inError).toEqual(false);
-          expect(after3_3[1][1].inError).toEqual(false);
-          expect(after3_4[1][1].inError).toEqual(true);
-
-          const init4 = await storeValueAfter(galaStore)(setGalaState([" A ", "A4A", " A "]));
-          expect(init4[1][1].inError).toEqual(false);
-          const after4_1 = await storeValueAfter(galaStore)(handleTileSelection(init4[0][1]));
-          const after4_2 = await storeValueAfter(galaStore)(handleTileSelection(after4_1[1][0]));
-          const after4_3 = await storeValueAfter(galaStore)(handleTileSelection(after4_2[1][2]));
-          const after4_4 = await storeValueAfter(galaStore)(handleTileSelection(after4_3[2][1]));
-          expect(after4_1[1][1].inError).toEqual(false);
-          expect(after4_2[1][1].inError).toEqual(false);
-          expect(after4_3[1][1].inError).toEqual(false);
-          expect(after4_4[1][1].inError).toEqual(false);
+          describe("error", () => {
+            const testWallError = testWallState(x => x.inError, "error");
+            testWallError("0")([false, true, true, true, true]);
+            testWallError("1")([false, false, true, true, true]);
+            testWallError("2")([false, false, false, true, true]);
+            testWallError("3")([false, false, false, false, true]);
+            testWallError("4")([false, false, false, false, false]);
+          });
         });
       });
 
