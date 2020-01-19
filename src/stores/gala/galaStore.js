@@ -16,13 +16,14 @@ const initialSpace = (value) => (rowIndex, colIndex) => {
   const isWall = /^\d+|\s$/.test(value);
   const numberAdjacent = isWall && /^\d+$/.test(value) 
     ? parseInt(value, 10) 
-    : undefined
+    : undefined;
+  const isIlluminated = isWall && numberAdjacent === 0;
   return {
     value,
     isWall,
     numberAdjacent,
     hasPawpurrazzi: false,
-    isIlluminated: false,
+    isIlluminated,
     inError: false,
     rowIndex,
     colIndex,
@@ -108,7 +109,7 @@ const tilesWithIlluminationSources = (...mappers) => (gala) =>
   );
 
 export const setGalaState = (rowStrings) => () => {
-  galaStore.update(() => initialGalaState(rowStrings))
+  galaStore.set(initialGalaState(rowStrings))
 }
 
 export const handleTileSelection = (tile) => () => {
