@@ -9,58 +9,56 @@
   </span>
 </div>
 
-<style type="text/scss">
-  .tile-wrapper {
-    display: flex;
-    padding: 1.5em;
-    border: 1px solid gray;
-    width: 1.5em;
-    justify-content: center;
+<style>
+.tile-wrapper {
+  display: flex;
+  padding: 1.5em;
+  border: 1px solid gray;
+  width: 1.5em;
+  justify-content: center;
+}
 
-    .value-wrapper {
-      padding: 1em;
-      border-radius: 4px;
-      min-height: 1em;
-      min-width: 1em;
-      margin: -1em;
-      font-weight: 800;
-      border: 2px solid transparent;
-    }
+.tile-wrapper[wall=true]{
+  background-color: gray;
+  color: white;
+}
 
-    &[wall=true]{
-      background-color: gray;
-      color: white;
+.tile-wrapper[wall=true] .value-wrapper[inError=true]{
+  color: darkred;
+}
 
-      .value-wrapper[inError=true]{
-        color: darkred;
-      }
+.tile-wrapper[wall=true] .value-wrapper[lit=true]{
+  color: yellowgreen;
+}
 
-      .value-wrapper[lit=true]{
-        color: yellowgreen;
-      }
-    }
+.tile-wrapper[wall=false] .value-wrapper[lit=true] {
+  background-color: yellowgreen;
+}
+.tile-wrapper[wall=false] .value-wrapper[lit=true][inError=true]{
+  background-color: red;
+}
 
-    &[wall=false] {
-      .value-wrapper {
-        &[lit=true] {
-          background-color: yellowgreen;
+.tile-wrapper[wall=false] .value-wrapper[pawpurrazzi=true]{
+  border: 2px solid darkgreen;
+  background-color: yellowgreen;
+  border-radius: 50%;
+}
 
-          &[inError=true]{
-            background-color: red;
-          }
-        }
+.tile-wrapper[wall=false] .value-wrapper[pawpurrazzi=true][inError=true]{
+  border: 2px solid darkred;
+  background-color: red;
+}
 
-        &[pawpurrazzi=true]{
-          border: 2px solid darkgreen;
-          background-color: yellowgreen;
-          border-radius: 50%;
 
-          &[inError=true]{
-            border: 2px solid darkred;
-            background-color: red;
-          }
-        }
-      }
-    }
-  }
+.value-wrapper {
+  padding: 1em;
+  border-radius: 4px;
+  min-height: 1em;
+  min-width: 1em;
+  margin: -1em;
+  font-weight: 800;
+  border: 2px solid transparent;
+}
+
+
 </style>
