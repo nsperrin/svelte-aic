@@ -1,4 +1,4 @@
-import { galaStore, setGalaState, handleTileSelection, initialGalaState } from "./galaStore";
+import { galaStore, setGalaState, handleTileSelection } from "./galaStore";
 import * as faker from "faker";
 
 const storeValueAfter = (store) => async (action, ...params) => new Promise(r => {
@@ -81,16 +81,6 @@ describe("galaStore", () => {
           expect(galaAfterSelection[1][1].hasPawpurrazzi).toEqual(true);
         });
 
-        it("illuminates adjacent areas", async () => {
-          const initialGala = await storeValueAfter(galaStore)(setGalaState([" S", "EE"]));
-          expect(initialGala[0][1].isIlluminated).toEqual(false);
-          expect(initialGala[1][0].isIlluminated).toEqual(false);
-
-          const galaAfterSelection = await storeValueAfter(galaStore)(handleTileSelection(initialGala[1][1]));
-          expect(galaAfterSelection[0][1].isIlluminated).toEqual(true);
-          expect(galaAfterSelection[1][0].isIlluminated).toEqual(true);
-        });
-
         it("illuminates until wall", async () => {
           const initialGala = await storeValueAfter(galaStore)(setGalaState([
             "ABCDCBA",
@@ -102,24 +92,91 @@ describe("galaStore", () => {
             "ABCDCBA",
           ]));
           expect(initialGala[0][3].isIlluminated).toEqual(false);
-          expect(initialGala[2][3].isIlluminated).toEqual(false);
           expect(initialGala[3][0].isIlluminated).toEqual(false);
-          expect(initialGala[3][2].isIlluminated).toEqual(false);
-          expect(initialGala[3][4].isIlluminated).toEqual(false);
           expect(initialGala[3][6].isIlluminated).toEqual(false);
-          expect(initialGala[4][3].isIlluminated).toEqual(false);
           expect(initialGala[6][3].isIlluminated).toEqual(false);
 
           const galaAfterSelection = await storeValueAfter(galaStore)(handleTileSelection(initialGala[3][3]));
 
-          expect(galaAfterSelection[0][3].isIlluminated).toEqual(false);
           expect(galaAfterSelection[2][3].isIlluminated).toEqual(true);
-          expect(galaAfterSelection[3][0].isIlluminated).toEqual(false);
           expect(galaAfterSelection[3][2].isIlluminated).toEqual(true);
           expect(galaAfterSelection[3][4].isIlluminated).toEqual(true);
-          expect(galaAfterSelection[3][6].isIlluminated).toEqual(false);
           expect(galaAfterSelection[4][3].isIlluminated).toEqual(true);
-          expect(galaAfterSelection[6][3].isIlluminated).toEqual(false);
+        });
+
+        describe("papurazzi state", () => {
+          const testPawpurrazziStates = (getter, name) => ({N = false, S = false, E = false, W = false} = {}) => (expected) => {
+            it(`${name} is set to ${expected} when ${JSON.stringify({N,S,E,W})}`, async () => {
+              const stateChange = storeValueAfter(galaStore);
+              const init1 = await stateChange(setGalaState([
+                "AAAAAAA", 
+                "AAA AAA", 
+                "AA A AA", 
+                "A AAA A",
+                "AA A AA",
+                "AAA AAA",
+                "AAAAAAA",
+              ]));
+              const init2 = await stateChange(handleTileSelection(init1[3][3]));
+              const stateN =  N ? await stateChange(handleTileSelection(init2[2][3])) : await stateChange(handleTileSelection(init2[0][3])); 
+              const stateS =  S ? await stateChange(handleTileSelection(stateN[4][3])) : await stateChange(handleTileSelection(stateN[6][3])); 
+              const stateE =  E ? await stateChange(handleTileSelection(stateS[3][2])) : await stateChange(handleTileSelection(stateS[3][0])); 
+              const stateW =  W ? await stateChange(handleTileSelection(stateE[3][4])) : await stateChange(handleTileSelection(stateE[3][6])); 
+              expect(getter(stateW[3][3])).toEqual(expected);
+            });
+          };
+
+          describe("error", () => {
+            const testPawpurrazziError = testPawpurrazziStates(x => x.inError, "error");
+            testPawpurrazziError()(false);
+            testPawpurrazziError({N: true})(true);
+            testPawpurrazziError({S: true})(true);
+            testPawpurrazziError({E: true})(true);
+            testPawpurrazziError({W: true})(true);
+          });
+        });
+
+        describe('empty letter tile states', () => {
+          const testLetterTileStates = (getter, name) => ({N = false, S = false, E = false, W = false} = {}) => (expected) => {
+            it(`${name} is set to ${expected} when ${JSON.stringify({N,S,E,W})}`, async () => {
+              const stateChange = storeValueAfter(galaStore);
+              const init = await stateChange(setGalaState(["AAA", `AAA`, "AAA"]));
+              const stateN =  N ? await stateChange(handleTileSelection(init[0][1])) : init; 
+              const stateS =  S ? await stateChange(handleTileSelection(stateN[2][1])) : stateN; 
+              const stateE =  E ? await stateChange(handleTileSelection(stateS[1][2])) : stateS; 
+              const stateW =  W ? await stateChange(handleTileSelection(stateE[1][0])) : stateE;
+              expect(getter(stateW[1][1])).toEqual(expected);
+            });
+          };
+
+          describe("illumination", () => {
+            const testLetterTileIllumination = testLetterTileStates(x => x.isIlluminated, "illumination");
+            testLetterTileIllumination()(false);
+            testLetterTileIllumination({N: true})(true);
+            testLetterTileIllumination({S: true})(true);
+            testLetterTileIllumination({E: true})(true);
+            testLetterTileIllumination({W: true})(true);
+          });
+
+          describe("error", () => {
+            const testLetterTileIllumination = testLetterTileStates(x => x.inError, "error");
+            testLetterTileIllumination()(false);
+            testLetterTileIllumination({N: true})(false);
+            testLetterTileIllumination({S: true })(false);
+            testLetterTileIllumination({E: true })(false);
+            testLetterTileIllumination({W: true })(false);
+            testLetterTileIllumination({N: true, S: true})(true);
+            testLetterTileIllumination({N: true, E: true})(false);
+            testLetterTileIllumination({N: true, W: true})(false);
+            testLetterTileIllumination({S: true, E: true })(false);
+            testLetterTileIllumination({S: true, W: true })(false);
+            testLetterTileIllumination({E: true, W: true })(true);
+            testLetterTileIllumination({N: true, S: true, E: true})(true);
+            testLetterTileIllumination({N: true, S: true, W: true})(true);
+            testLetterTileIllumination({N: true, E: true, W: true})(true);
+            testLetterTileIllumination({S: true, E: true, W: true })(true);
+            testLetterTileIllumination({N:true, S: true, E: true, W: true })(true);
+          });
         });
 
         describe('wall states', () => {
