@@ -18,6 +18,7 @@ const initialSpace = (value) => (rowIndex, colIndex) => {
     ? parseInt(value, 10) 
     : undefined;
   const isIlluminated = isWall && numberAdjacent === 0;
+  const imageId = Math.floor(Math.random() * Math.floor(7));
   return {
     value,
     isWall,
@@ -27,6 +28,7 @@ const initialSpace = (value) => (rowIndex, colIndex) => {
     inError: false,
     rowIndex,
     colIndex,
+    catImageSrc: `../assets/cat${imageId}.png`,
   }
 };
 
