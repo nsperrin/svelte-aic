@@ -15,11 +15,11 @@ function App() {
   };
 
   return (
-    <>
+    <main>
       <CounterButton onClick={increaseCounter} buttonText={'Increase'}></CounterButton>
       <CounterButton onClick={decreaseCounter} buttonText={'Decrease'}></CounterButton>
       <CounterDisplay text={counter}></CounterDisplay>
-    </>
+    </main>
   );
 }
 
